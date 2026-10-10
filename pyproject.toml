@@ -8,18 +8,40 @@ version = "1.0.0"
 description = "Official Python SDK for the irnoti platform API (SMS, pattern, SOS, phonebook, services, verify, bots, VoIP, webhooks)."
 readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE.md"]
 requires-python = ">=3.9"
 dependencies = ["httpx>=0.25"]
-keywords = ["irnoti", "sms", "sdk", "api-client"]
+keywords = ["irnoti", "sms", "sms-api", "sdk", "api-client", "otp", "iran"]
+authors = [{ name = "irnoti", email = "support@irnoti.com" }]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Communications",
+    "Typing :: Typed",
+]
 
 [project.urls]
+Homepage = "https://irnoti.com"
 Documentation = "https://irnoti.com/docs"
+Repository = "https://github.com/irnoti/python-sms-panel-api"
+Issues = "https://github.com/irnoti/python-sms-panel-api/issues"
+Changelog = "https://github.com/irnoti/python-sms-panel-api/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-dev = ["pytest>=8"]
+dev = ["pytest>=8", "build", "twine"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/irnoti"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "README.md", "LICENSE.md", "CHANGELOG.md"]

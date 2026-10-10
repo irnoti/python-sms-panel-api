@@ -1,5 +1,7 @@
 # irnoti (Python)
 
+[![PyPI](https://img.shields.io/pypi/v/irnoti.svg)](https://pypi.org/project/irnoti/) [![tests](https://github.com/irnoti/python-sms-panel-api/actions/workflows/tests.yml/badge.svg)](https://github.com/irnoti/python-sms-panel-api/actions/workflows/tests.yml) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.md)
+
 Python SDK for the irnoti API, built on `httpx`.
 
 ```bash
