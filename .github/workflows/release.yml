@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
       - name: Tag must match pyproject version
@@ -33,6 +33,6 @@ jobs:
       - uses: actions/download-artifact@v4
         with: { name: dist, path: dist/ }
       - uses: pypa/gh-action-pypi-publish@release/v1
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: gh release create "$GITHUB_REF_NAME" --generate-notes dist/*
         env: { GH_TOKEN: '${{ github.token }}' }
