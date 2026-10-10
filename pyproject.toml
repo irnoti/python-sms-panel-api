@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "irnoti"
+version = "1.0.0"
+description = "Official Python SDK for the irnoti platform API (SMS, pattern, SOS, phonebook, services, verify, bots, VoIP, webhooks)."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+dependencies = ["httpx>=0.25"]
+keywords = ["irnoti", "sms", "sdk", "api-client"]
+
+[project.urls]
+Documentation = "https://irnoti.com/docs"
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/irnoti"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
