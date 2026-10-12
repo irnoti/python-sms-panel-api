@@ -31,15 +31,24 @@ event = parse_webhook(request.get_data(), request.headers["X-Irnoti-Signature"],
 
 Multi-tenant: `irnoti.with_api_key(customer_key)` returns an independent client. Optional request fields use the API's camelCase names where they are passed as `**options` / dicts (e.g. `verify.create(to=…, ttlSec=300)`).
 
+### Telegram broker
+
+```python
+bot = irnoti.broker.create("Shop bot", botfather_token)    # scope broker.write (account owner); returns the relay `link`
+irnoti.broker.request(bot["id"], "sendMessage", {"chat_id": 123, "text": "Hi"})   # scope broker.request
+irnoti.broker.updates(bot["id"], limit=20)                  # pull mode
+irnoti.broker.set_webhook(bot["id"], "https://example.com/tg", secret_token="s3cret")  # push mode
+```
+
 ## Behaviour shared by all irnoti SDKs
 
-- **Auth:** `Authorization: Bearer irn_live_…`. Use an `irn_test_…` key with `lineId: "sandbox"` to try sends for free. Keys carry scopes (`sms.send`, `sms.read`, `wallet.read`, `phonebook.read|write`, `bot.send|read`, `verify.send|read`); a missing scope is a `403`.
+- **Auth:** `Authorization: Bearer irn_live_…`. Use an `irn_test_…` key with `lineId: "sandbox"` to try sends for free. Keys carry scopes (`sms.send`, `sms.read`, `wallet.read`, `phonebook.read|write`, `bot.send|read`, `broker.read|write|request`, `verify.send|read`); a missing scope is a `403`.
 - **Money** is integer **Rial** returned as a **string** (`"1960"`) — never parse it into a float.
 - **Idempotency:** every send takes an idempotency key; retrying with the same key never sends twice (`replayed: true`). Automatic retries apply only to `GET`s and sends that carry a key.
 - **Errors:** one error type carrying `status`, the API's machine `code` (`insufficient_balance`, `invalid_recipients`, `no_price`, … — empty for plain 401/403/404) and `details`, with helpers such as `isInsufficientBalance` / `isRateLimited` / `isUnauthenticated`.
 - **Limits:** send 600 req/min, pattern 1200 req/min per IP (`429` when exceeded).
 - **Webhooks:** verify the **raw** body against `X-Irnoti-Signature: t=<unix>,v1=<hex>` (HMAC-SHA256 of `"<t>.<body>"` with your `whsec_…` key); signatures older than 5 minutes are rejected.
-- Bot creation/configuration and verify settings are panel-only and not exposed.
+- Bot-builder creation/configuration and verify settings are panel-only; Telegram broker bots can be managed through the API.
 
 Sibling SDKs: [Laravel](https://github.com/irnoti/laravel-sms-panel-api) · [Node.js](https://github.com/irnoti/node-sms-panel-api) · [Python](https://github.com/irnoti/python-sms-panel-api) · [Go](https://github.com/irnoti/go-sms-panel-api) · [PHP](https://github.com/irnoti/php-sms-panel-api). API reference: [irnoti.com/docs](https://irnoti.com/docs).
 

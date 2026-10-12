@@ -264,6 +264,56 @@ class Bots(_Resource):
         return self._t.request("GET", f"/botbuilder/bots/{_e(bot_id)}/shop/stats")
 
 
+class Broker(_Resource):
+    """Telegram broker: register a bot token, get a private relay link, call the Bot API and pull updates through it."""
+
+    def list(self) -> List[Json]:
+        return self._t.request("GET", "/broker/bots")
+
+    def get(self, id: Id) -> Json:
+        return self._t.request("GET", f"/broker/bots/{_e(id)}")
+
+    def create(self, label: str, token: str) -> Json:
+        """Scope ``broker.write``, account owner only. The token is never returned afterwards; the response carries the relay ``link``."""
+        return self._t.request("POST", "/broker/bots", body={"label": label, "token": token})
+
+    def rename(self, id: Id, label: str) -> None:
+        self._t.request("PATCH", f"/broker/bots/{_e(id)}", body={"label": label})
+
+    def replace_token(self, id: Id, token: str) -> Json:
+        """Swap in a regenerated BotFather token. Clears the return webhook."""
+        return self._t.request("PUT", f"/broker/bots/{_e(id)}/token", body={"token": token})
+
+    def rotate(self, id: Id) -> Json:
+        """New relay link; the previous one stops working."""
+        return self._t.request("POST", f"/broker/bots/{_e(id)}/rotate")
+
+    def delete(self, id: Id) -> None:
+        self._t.request("DELETE", f"/broker/bots/{_e(id)}")
+
+    def request(self, id: Id, method: str, params: Optional[Mapping[str, Any]] = None) -> Json:
+        """Scope ``broker.request``: call any Telegram Bot API method. Returns ``{status, response}``."""
+        return self._t.request("POST", f"/broker/bots/{_e(id)}/request", body={"method": method, "params": dict(params or {})})
+
+    def updates(self, id: Id, offset: Optional[int] = None, limit: Optional[int] = None, timeout: Optional[int] = None,
+                allowed_updates: Optional[List[str]] = None) -> Json:
+        """Scope ``broker.request``: pull updates (long-poll ``timeout`` <= 25 s)."""
+        return self._t.request("POST", f"/broker/bots/{_e(id)}/updates",
+                               body={"offset": offset, "limit": limit, "timeout": timeout, "allowedUpdates": allowed_updates})
+
+    def webhook(self, id: Id) -> Json:
+        return self._t.request("GET", f"/broker/bots/{_e(id)}/webhook")
+
+    def set_webhook(self, id: Id, url: str, secret_token: Optional[str] = None, allowed_updates: Optional[List[str]] = None,
+                    drop_pending_updates: Optional[bool] = None) -> Json:
+        return self._t.request("PUT", f"/broker/bots/{_e(id)}/webhook",
+                               body={"url": url, "secretToken": secret_token, "allowedUpdates": allowed_updates,
+                                     "dropPendingUpdates": drop_pending_updates})
+
+    def delete_webhook(self, id: Id, drop_pending_updates: Optional[bool] = None) -> Json:
+        return self._t.request("DELETE", f"/broker/bots/{_e(id)}/webhook", body={"dropPendingUpdates": drop_pending_updates})
+
+
 class Voip(_Resource):
     def calls(self) -> List[Json]:
         return self._t.request("GET", "/voip/calls")

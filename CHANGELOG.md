@@ -2,6 +2,11 @@
 
 All notable changes to this package are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-10-12
+
+### Added
+- Telegram broker (`broker.*` scopes): register/rename/delete bots, replace token, rotate relay link, call any Bot API method (`request`), pull `updates`, and manage the return webhook.
+
 ## [1.0.0] - 2026-10-10
 
 ### Added

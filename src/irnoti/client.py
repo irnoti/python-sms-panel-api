@@ -7,7 +7,7 @@ import httpx
 
 from .errors import IrnotiApiError
 from .resources import (
-    Batches, Bots, Lines, LinkTracker, Messages, NumberBanks, Phonebook, Services, Sms, Verify, Voip, Wallet,
+    Batches, Bots, Broker, Lines, LinkTracker, Messages, NumberBanks, Phonebook, Services, Sms, Verify, Voip, Wallet,
 )
 
 DEFAULT_BASE_URL = "https://api.irnoti.com"
@@ -106,6 +106,7 @@ class Irnoti:
         self.number_banks = NumberBanks(t)
         self.verify = Verify(t)
         self.bots = Bots(t)
+        self.broker = Broker(t)
         self.voip = Voip(t)
 
     def with_api_key(self, api_key: str) -> "Irnoti":
