@@ -92,3 +92,19 @@ def test_webhook():
     assert not verify_webhook(body, "junk", "whsec")
     with pytest.raises(ValueError):
         parse_webhook(body, "junk", "whsec")
+
+
+def test_broker_routes_and_bodies():
+    api, calls = make(200, {})
+    api.broker.request(7, "sendMessage", {"chat_id": 1, "text": "hi"})
+    api.broker.updates(7, limit=10, allowed_updates=["message"])
+    api.broker.set_webhook(7, "https://example.com/hook", secret_token="s")
+    api.broker.delete_webhook(7, True)
+    api.broker.replace_token(7, "123456:ABCDEF-token")
+    assert [(c.method, c.url.path) for c in calls] == [
+        ("POST", "/v1/broker/bots/7/request"), ("POST", "/v1/broker/bots/7/updates"), ("PUT", "/v1/broker/bots/7/webhook"),
+        ("DELETE", "/v1/broker/bots/7/webhook"), ("PUT", "/v1/broker/bots/7/token"),
+    ]
+    assert json.loads(calls[0].content) == {"method": "sendMessage", "params": {"chat_id": 1, "text": "hi"}}
+    assert json.loads(calls[1].content) == {"limit": 10, "allowedUpdates": ["message"]}
+    assert json.loads(calls[3].content) == {"dropPendingUpdates": True}
