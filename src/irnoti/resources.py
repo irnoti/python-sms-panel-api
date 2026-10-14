@@ -17,6 +17,11 @@ def _idem(key: Optional[str]) -> Optional[Dict[str, str]]:
     return {"Idempotency-Key": key} if key else None
 
 
+def _line(line_id: Any) -> Optional[str]:
+    """``lineId`` is optional: ``None``/empty is dropped from the body so the server picks the line."""
+    return None if line_id is None or line_id == "" else str(line_id)
+
+
 def _ids(g: Optional[Iterable[Id]]) -> Optional[List[str]]:
     return [str(x) for x in g] if g else None
 
@@ -29,29 +34,29 @@ class _Resource:
 class Sms(_Resource):
     def send(
         self,
-        line_id: Union[Id, str],
-        text: str,
+        line_id: Union[Id, str, None] = None,
+        text: str = "",
         to: Union[str, List[str], None] = None,
         group_ids: Optional[Iterable[Id]] = None,
         scheduled_at: Union[datetime, str, None] = None,
         gradual: Optional[Mapping[str, int]] = None,
         idempotency_key: Optional[str] = None,
     ) -> Json:
-        """Scope ``sms.send``. ``line_id="sandbox"`` + an ``irn_test_`` key sends nothing and costs nothing.
+        """Scope ``sms.send``. ``line_id`` is optional (omitted → the server picks the sender line). ``line_id="sandbox"`` + an ``irn_test_`` key sends nothing and costs nothing.
 
         ``scheduled_at``: 1 minute – 60 days ahead. ``gradual``: ``{"chunkSize": 500, "intervalMinutes": 10}``.
         Returns ``{batchId, count, totalPrice, replayed}`` (``totalPrice`` is integer Rial as a string).
         """
         return self._t.request("POST", "/sms/send", headers=_idem(idempotency_key), body={
-            "lineId": str(line_id), "to": to, "groupIds": _ids(group_ids), "text": text,
+            "lineId": _line(line_id), "to": to, "groupIds": _ids(group_ids), "text": text,
             "scheduledAt": scheduled_at, "gradual": dict(gradual) if gradual else None,
         })
 
-    def quote(self, line_id: Union[Id, str], text: str, to: Union[str, List[str], None] = None,
+    def quote(self, line_id: Union[Id, str, None] = None, text: str = "", to: Union[str, List[str], None] = None,
               group_ids: Optional[Iterable[Id]] = None) -> Json:
         """Scope ``sms.read``: exact cost without sending or charging."""
         return self._t.request("POST", "/sms/quote", body={
-            "lineId": str(line_id), "to": to, "groupIds": _ids(group_ids), "text": text})
+            "lineId": _line(line_id), "to": to, "groupIds": _ids(group_ids), "text": text})
 
     def pattern(self, code: str, to: str, params: Optional[Mapping[str, Any]] = None,
                 idempotency_key: Optional[str] = None) -> Json:
@@ -164,11 +169,11 @@ class Services(_Resource):
 
 
 class LinkTracker(_Resource):
-    def send(self, line_id: Id, text: str, url: str, to: Optional[List[str]] = None,
+    def send(self, line_id: Optional[Id] = None, text: str = "", url: str = "", to: Optional[List[str]] = None,
              group_ids: Optional[Iterable[Id]] = None, variants: Optional[List[str]] = None,
              holdout_percent: Optional[int] = None, decide_after_minutes: Optional[int] = None) -> Json:
         return self._t.request("POST", "/link-tracker/send", body={
-            "lineId": str(line_id), "text": text, "url": url, "to": to, "groupIds": _ids(group_ids),
+            "lineId": _line(line_id), "text": text, "url": url, "to": to, "groupIds": _ids(group_ids),
             "variants": variants, "holdoutPercent": holdout_percent, "decideAfterMinutes": decide_after_minutes})
 
     def holdouts(self) -> List[Json]:
@@ -191,13 +196,13 @@ class NumberBanks(_Resource):
     def facets(self, bank_id: Id) -> Json:
         return self._t.request("GET", f"/number-banks/{_e(bank_id)}/facets")
 
-    def _body(self, bank_id: Id, count: int, line_id: Id, text: str, filters: Optional[Mapping[str, str]]) -> Json:
-        return {"bankId": str(bank_id), "count": count, "lineId": str(line_id), "text": text, "filters": dict(filters or {})}
+    def _body(self, bank_id: Id, count: int, line_id: Optional[Id], text: str, filters: Optional[Mapping[str, str]]) -> Json:
+        return {"bankId": str(bank_id), "count": count, "lineId": _line(line_id), "text": text, "filters": dict(filters or {})}
 
-    def quote(self, bank_id: Id, count: int, line_id: Id, text: str, filters: Optional[Mapping[str, str]] = None) -> Json:
+    def quote(self, bank_id: Id, count: int, line_id: Optional[Id], text: str, filters: Optional[Mapping[str, str]] = None) -> Json:
         return self._t.request("POST", "/number-banks/quote", body=self._body(bank_id, count, line_id, text, filters))
 
-    def send(self, bank_id: Id, count: int, line_id: Id, text: str, filters: Optional[Mapping[str, str]] = None,
+    def send(self, bank_id: Id, count: int, line_id: Optional[Id], text: str, filters: Optional[Mapping[str, str]] = None,
              idempotency_key: Optional[str] = None) -> Json:
         return self._t.request("POST", "/number-banks/send", headers=_idem(idempotency_key),
                                body=self._body(bank_id, count, line_id, text, filters))

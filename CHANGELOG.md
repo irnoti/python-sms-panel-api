@@ -2,6 +2,11 @@
 
 All notable changes to this package are documented here. This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] - 2026-10-14
+
+### Changed
+- `line_id` is now optional everywhere (`sms.send`, `sms.quote`, link tracker, number banks). When omitted it is not sent and the server chooses the sender line. Passing it still works exactly as before.
+
 ## [1.1.0] - 2026-10-12
 
 ### Added

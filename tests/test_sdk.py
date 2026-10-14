@@ -35,6 +35,12 @@ def test_send_builds_request():
                                        "scheduledAt": "2026-10-20T09:00:00+00:00"}
 
 
+def test_send_omits_line_id_when_not_given():
+    api, calls = make(201, {"batchId": "1", "count": 1, "totalPrice": "980", "replayed": False})
+    api.sms.send(text="hi", to="0912")
+    assert json.loads(calls[0].content) == {"to": "0912", "text": "hi"}
+
+
 def test_query_skips_none_and_pattern_params_object():
     api, calls = make(200, [])
     api.messages.list(take=2, before=90)
